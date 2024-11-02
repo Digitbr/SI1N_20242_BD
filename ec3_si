@@ -1,0 +1,190 @@
+Create schema EC3_SI1;
+use EC3_SI3;
+
+
+CREATE TABLE Clientes (
+    cliente_id INT PRIMARY KEY AUTO_INCREMENT,
+    cnpj VARCHAR(14) NOT NULL UNIQUE,
+    razao_social VARCHAR(100) NOT NULL,
+    ramo_atividade VARCHAR(50),
+    data_cadastramento DATE NOT NULL,
+    pessoa_contato VARCHAR(100)
+);
+
+-- Tabela TelefonesClientes
+CREATE TABLE TelefonesClientes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT,
+    telefone VARCHAR(15) NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id)
+);
+
+-- Tabela EnderecosClientes
+CREATE TABLE EnderecosClientes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT,
+    tipo_endereco_id INT,
+    numero VARCHAR(10),
+    logradouro VARCHAR(100),
+    complemento VARCHAR(100),
+    cep VARCHAR(10),
+    bairro VARCHAR(50),
+    cidade VARCHAR(50),
+    estado VARCHAR(50),
+    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id),
+    FOREIGN KEY (tipo_endereco_id) REFERENCES TiposEndereco(codigo)
+);
+
+-- Tabela Empregados
+CREATE TABLE Empregados (
+    matricula INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    cargo VARCHAR(50) NOT NULL,
+    salario DECIMAL(10, 2) NOT NULL,
+    data_admissao DATE NOT NULL,
+    qualificacoes TEXT,
+    endereco_id INT,
+    FOREIGN KEY (endereco_id) REFERENCES EnderecosEmpregados(id)
+);
+
+-- Tabela TelefonesEmpregados
+CREATE TABLE TelefonesEmpregados (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    empregado_id INT,
+    telefone VARCHAR(15) NOT NULL,
+    FOREIGN KEY (empregado_id) REFERENCES Empregados(matricula)
+);
+
+-- Tabela Empresas
+CREATE TABLE Empresas (
+    cnpj VARCHAR(14) PRIMARY KEY,
+    razao_social VARCHAR(100) NOT NULL,
+    pessoa_contato VARCHAR(100),
+    endereco_id INT,
+    FOREIGN KEY (endereco_id) REFERENCES EnderecosEmpresas(id)
+);
+
+-- Tabela TelefonesEmpresas
+CREATE TABLE TelefonesEmpresas (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    empresa_cnpj VARCHAR(14),
+    telefone VARCHAR(15) NOT NULL,
+    FOREIGN KEY (empresa_cnpj) REFERENCES Empresas(cnpj)
+);
+
+-- Tabela Fornecedores
+CREATE TABLE Fornecedores (
+    cnpj VARCHAR(14) PRIMARY KEY,
+    razao_social VARCHAR(100) NOT NULL,
+    endereco_id INT,
+    pessoa_contato VARCHAR(100),
+    FOREIGN KEY (endereco_id) REFERENCES EnderecosFornecedores(id)
+);
+
+-- Tabela TelefonesFornecedores
+CREATE TABLE TelefonesFornecedores (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fornecedor_cnpj VARCHAR(14),
+    telefone VARCHAR(15) NOT NULL,
+    FOREIGN KEY (fornecedor_cnpj) REFERENCES Fornecedores(cnpj)
+);
+
+-- Tabela TiposEndereco
+CREATE TABLE TiposEndereco (
+    codigo INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL
+);
+
+-- Tabela Enderecos
+CREATE TABLE Enderecos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    numero VARCHAR(10),
+    logradouro VARCHAR(100),
+    complemento VARCHAR(100),
+    cep VARCHAR(10),
+    bairro VARCHAR(50),
+    cidade VARCHAR(50),
+    estado VARCHAR(50)
+);
+
+-- Tabela Encomendas
+CREATE TABLE Encomendas (
+    numero INT PRIMARY KEY AUTO_INCREMENT,
+    data_inclusao DATE NOT NULL,
+    valor_total DECIMAL(10, 2) NOT NULL,
+    valor_desconto DECIMAL(10, 2),
+    valor_liquido DECIMAL(10, 2) NOT NULL,
+    forma_pagamento_id INT,
+    quantidade_parcelas INT,
+    cliente_id INT,
+    FOREIGN KEY (forma_pagamento_id) REFERENCES FormasPagamento(id),
+    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id)
+);
+
+-- Tabela Produtos
+CREATE TABLE Produtos (
+    codigo INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    cor VARCHAR(30),
+    dimensoes VARCHAR(50),
+    peso DECIMAL(10, 2),
+    preco DECIMAL(10, 2) NOT NULL,
+    tempo_fabricacao INT,
+    desenho_produto TEXT,
+    horas_mao_obra DECIMAL(10, 2) NOT NULL
+);
+
+-- Tabela TiposComponente
+CREATE TABLE TiposComponente (
+    codigo INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL
+);
+
+-- Tabela Componentes
+CREATE TABLE Componentes (
+    codigo INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    quantidade_estoque INT NOT NULL,
+    preco_unitario DECIMAL(10, 2) NOT NULL,
+    unidade VARCHAR(20) NOT NULL,
+    tipo_componente_id INT,
+    FOREIGN KEY (tipo_componente_id) REFERENCES TiposComponente(codigo)
+);
+
+-- Tabela Maquinas
+CREATE TABLE Maquinas (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    tempo_vida INT NOT NULL,
+    data_compra DATE NOT NULL,
+    data_fim_garantia DATE NOT NULL
+);
+
+-- Tabela RecursosEspecificos
+CREATE TABLE RecursosEspecificos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    quantidade_necessaria INT NOT NULL,
+    unidade VARCHAR(20) NOT NULL,
+    tempo_uso INT NOT NULL,
+    horas_mao_obra DECIMAL(10, 2) NOT NULL,
+    produto_id INT,
+    FOREIGN KEY (produto_id) REFERENCES Produtos(codigo)
+);
+
+-- Tabela RegistroManutencao
+CREATE TABLE RegistroManutencao (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    data DATE NOT NULL,
+    descricao TEXT NOT NULL,
+    maquina_id INT,
+    FOREIGN KEY (maquina_id) REFERENCES Maquinas(id)
+);
+
+-- Tabela RegistroSuprimentos
+CREATE TABLE RegistroSuprimentos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    quantidade INT NOT NULL,
+    data_necessidade DATE NOT NULL,
+    componente_id INT,
+    FOREIGN KEY (componente_id) REFERENCES Componentes(codigo)
+);
+drop view preco_unitario;
